@@ -1,8 +1,10 @@
 module JiraIntegration
   module Commands
-    Help.add(:Usage, "jira-cli <command> [options] [arguments]\n")
+    extend Help
 
-    JiraIntegration::Help.add(
+    help_registry.add(:Usage, "jira-cli <command> [options] [arguments]\n")
+
+    help_registry.add(
       :help,
       "print help information",
       "help [command]"
@@ -15,10 +17,10 @@ module JiraIntegration
         command = command.to_sym
       end
 
-      puts JiraIntegration::Help.get(command).join("\n")
+      puts help_registry.get(command).join("\n")
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :branch,
       "create branch for issue",
       "branch <issue_id> [branch name] [--branch_from=develop]"
@@ -31,7 +33,7 @@ module JiraIntegration
       `git checkout -B "feature/#{key}-#{branch_name}" "#{branch_from}"`
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :branches,
       "list existing branches for issue",
       "branches <issue_id>"
@@ -42,7 +44,7 @@ module JiraIntegration
       puts `git branch -a | grep -i '#{key}'`
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :filter,
       "print filtered issues",
       "filter <filter_id>"
@@ -54,7 +56,7 @@ module JiraIntegration
       puts data.to_yaml
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :filters,
       "print current user existing filters",
       "filters"
@@ -65,7 +67,7 @@ module JiraIntegration
       puts data.to_yaml
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :issue,
       "print inrmations about specified issue",
       "issue <issue_id>"
@@ -75,7 +77,7 @@ module JiraIntegration
       puts data.to_yaml
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :myself,
       "print print information about current user",
       "myself"
@@ -84,7 +86,7 @@ module JiraIntegration
       puts JiraIntegration.api_client.myself.to_yaml
     end
 
-    JiraIntegration::Help.add(
+    help_registry.add(
       :show_filter,
       "print information about the informed filter",
       "filters"
