@@ -4,7 +4,7 @@ module JiraIntegration
       new(*args).run
     end
 
-    attr_accessor :raw_args, :command, :args, :named_args
+    attr_accessor :raw_args, :command, :list_args, :named_args
 
     def initialize(*raw_args)
       self.raw_args = raw_args
@@ -14,7 +14,7 @@ module JiraIntegration
     def parse_arguments
       self.command = command_from_raw_args
       self.named_args = named_args_from_raw_args
-      self.args = args_from_raw_args
+      self.list_args = list_args_from_raw_args
     end
 
     def command_from_raw_args
@@ -28,16 +28,20 @@ module JiraIntegration
       Commands.methods(false)
     end
 
-    def args_from_raw_args
-      raw_args[1..-1].grep(/^[^-]/)
+    def list_args_from_raw_args
+      args.grep(/^[^-]/)
     end
 
     def named_args_from_raw_args
-      Hash[raw_args[1..-1].grep(/^-/).map{|a| a.sub(/^--/, '').gsub(/-/, '_').split('=').tap{|i| i[0] = i[0].to_sym} }]
+      Hash[args.grep(/^-/).map{|a| a.sub(/^--/, '').gsub(/-/, '_').split('=').tap{|i| i[0] = i[0].to_sym} }]
+    end
+
+    def args
+      raw_args[1..-1] || []
     end
 
     def run
-      Commands.send(command, *args, **named_args)
+      Commands.send(command, *list_args, **named_args)
     end
   end
 end
