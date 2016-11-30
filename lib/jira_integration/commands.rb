@@ -28,8 +28,29 @@ module JiraIntegration
     def self.branch(issue_id, branch_name = nil, branch_from: 'develop', **args)
       data = JiraIntegration.api_client.issue(issue_id)
       key = data[:key]
-      branch_name ||= data[:fields][:summary]
-      branch_name = branch_name.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+      if branch_name
+        branch_name = branch_name.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+        branch_name = "feature/#{key}-#{branch_name}"
+      else
+        branches = `git branch --no-color -a`.lines.map(&:strip)
+        search_regexp = Regexp.new("/#{key}-", :i)
+        related_branches = branches.grep(search_regexp)
+
+        if related_branches.empty?
+          branch_name = data[:fields][:summary]
+          branch_name = branch_name.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+          branch_name = "feature/#{key}-#{branch_name}"
+        elsif related_branches.size == 1
+          branch_name = related_branches.first
+          if branch_name.match('remotes/[^/]/.*')
+            branch_name = branch_name.split('/', 3).last
+          end
+        else
+          puts "too many found: please, specify branch name."
+          puts related_branches.join("\n")
+          return
+        end
+      end
       `git checkout -B "feature/#{key}-#{branch_name}" "#{branch_from}"`
     end
 
