@@ -51,7 +51,7 @@ module JiraIntegration
           return
         end
       end
-      `git checkout -B "feature/#{key}-#{branch_name}" "#{branch_from}"`
+      `git checkout -B "#{branch_name}" "#{branch_from}"`
     end
 
     help_registry.add(
