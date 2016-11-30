@@ -33,6 +33,9 @@ module JiraIntegration
         branch_name = "feature/#{key}-#{branch_name}"
       else
         branches = `git branch --no-color -a`.lines.map(&:strip)
+        branches = branches.map{|b| b.sub(/^\*\s+/, '').sub(/^remotes\/[^\/]+\//, '') }
+        branches = branches.uniq
+
         search_regexp = Regexp.new("/#{key}-", :i)
         related_branches = branches.grep(search_regexp)
 
@@ -42,9 +45,6 @@ module JiraIntegration
           branch_name = "feature/#{key}-#{branch_name}"
         elsif related_branches.size == 1
           branch_name = related_branches.first
-          if branch_name.match('remotes/[^/]/.*')
-            branch_name = branch_name.split('/', 3).last
-          end
         else
           puts "too many found: please, specify branch name."
           puts related_branches.join("\n")
@@ -62,7 +62,14 @@ module JiraIntegration
     def self.branches(issue_id, *args)
       data = JiraIntegration.api_client.issue(issue_id)
       key = data[:key]
-      puts `git branch -a | grep -i '#{key}'`
+
+      branches = `git branch --no-color -a`.lines.map(&:strip)
+      branches = branches.map{|b| b.sub(/^\*\s+/, '').sub(/^remotes\/[^\/]+\//, '') }
+      branches = branches.uniq
+      search_regexp = Regexp.new("/#{key}-", :i)
+      related_branches = branches.grep(search_regexp)
+
+      puts related_branches.join("\n")
     end
 
     help_registry.add(
