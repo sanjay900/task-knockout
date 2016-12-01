@@ -29,6 +29,12 @@ module JiraIntegration
       JSON.parse(response.body, symbolize_names: true)
     end
 
+    def issue_transitions(id)
+      resource = build_resource('api/2/issue', id, 'transitions')
+      response = resource.get
+      JSON.parse(response.body, symbolize_names: true)
+    end
+
     def my_filters
       resource = build_resource('api/2/filter', 'my')
       response = resource.get

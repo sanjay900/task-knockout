@@ -90,18 +90,29 @@ module JiraIntegration
       "filters"
     )
     def self.filters(*args)
-      filters = JiraIntegration.api_client.my_filters
-      data = filters.map{|f| {id: f[:id], name: f[:name], search_url: f[:searchUrl]}}
+      data = JiraIntegration.api_client.my_filters
+      data = data.map{|f| {id: f[:id], name: f[:name], search_url: f[:searchUrl]}}
       puts data.to_yaml
     end
 
     help_registry.add(
       :issue,
-      "print inrmations about specified issue",
+      "print information about specified issue",
       "issue <issue_id>"
     )
     def self.issue(issue_id, *args)
       data = JiraIntegration.api_client.issue(issue_id)
+      puts data.to_yaml
+    end
+
+    help_registry.add(
+      :issue_transitions,
+      "list available transitions for specified issue",
+      "issue_transitions <issue_id>"
+    )
+    def self.issue_transitions(issue_id, *args)
+      data = JiraIntegration.api_client.issue_transitions(issue_id)
+      data = data[:transitions].map{|f| {id: f[:id], name: f[:name]} }
       puts data.to_yaml
     end
 
