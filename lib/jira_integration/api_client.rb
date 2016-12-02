@@ -35,6 +35,16 @@ module JiraIntegration
       JSON.parse(response.body, symbolize_names: true)
     end
 
+    def transition(issue_id, state_id)
+      resource = build_resource('api/2/issue', issue_id, 'transitions')
+      response = resource.post({transition: {id: state_id}}.to_json, content_type: :json)
+      if response.code == 204
+        true
+      else
+        JSON.parse(response.body, symbolize_names: true)
+      end
+    end
+
     def my_filters
       resource = build_resource('api/2/filter', 'my')
       response = resource.get

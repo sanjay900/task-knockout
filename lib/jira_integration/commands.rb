@@ -135,5 +135,16 @@ module JiraIntegration
       puts filter.to_yaml
     end
 
+    help_registry.add(
+      :transitions,
+      "transition a issue to another state",
+      "transitions <issue_id> <state_id>"
+    )
+    def self.transition(issue_id, state_id, *args)
+      data = JiraIntegration.api_client.transition(issue_id, state_id)
+      puts data.to_yaml
+    end
+
+
   end
 end
