@@ -80,8 +80,10 @@ module JiraIntegration
     def self.filter(filter_id, *args)
       search = JiraIntegration.api_client.search_by_filter(filter_id)
       # data = search[:issues].map{|i| {id: i[:id], key: i[:key], summary: i[:fields][:summary], description: i[:fields][:description]} }
-      data = search[:issues].map{|i| {id: i[:id], key: i[:key], summary: i[:fields][:summary]} }
-      puts data.to_yaml
+      # data = search[:issues].map{|i| {id: i[:id], key: i[:key], summary: i[:fields][:summary]} }
+      # puts data.to_yaml
+      data = search[:issues].map{|i| {key: i[:key], summary: i[:fields][:summary]} }
+      tp data, :key, summary: {width: 130}
     end
 
     help_registry.add(
@@ -91,8 +93,10 @@ module JiraIntegration
     )
     def self.filters(*args)
       data = JiraIntegration.api_client.my_filters
-      data = data.map{|f| {id: f[:id], name: f[:name], search_url: f[:searchUrl]}}
-      puts data.to_yaml
+      # data = data.map{|f| {id: f[:id], name: f[:name], search_url: f[:searchUrl]}, jql: f[:jql]}}
+      # puts data.to_yaml
+      data = data.map{|f| {id: f[:id], name: f[:name]}}
+      tp data
     end
 
     help_registry.add(
@@ -101,8 +105,18 @@ module JiraIntegration
       "issue <issue_id>"
     )
     def self.issue(issue_id, *args)
-      data = JiraIntegration.api_client.issue(issue_id)
+      issue = JiraIntegration.api_client.issue(issue_id)
+      fields = issue[:fields]
+      data = {
+        key: issue[:key],
+        summary: fields[:summary],
+        issuetype: fields[:issuetype][:name],
+        status: fields[:status][:name],
+        creator: fields[:creator][:displayName],
+        reporter: fields[:reporter][:displayName],
+      }
       puts data.to_yaml
+      puts "description: #{fields[:description]}"
     end
 
     help_registry.add(
@@ -132,7 +146,15 @@ module JiraIntegration
     )
     def self.show_filter(filter_id, *args)
       filter = JiraIntegration.api_client.filter(filter_id)
-      puts filter.to_yaml
+      data = {
+        id: filter[:id],
+        name: filter[:name],
+        owner: filter[:owner][:displayName],
+        jql: filter[:jql],
+        viewUrl: filter[:viewUrl],
+        # searchUrl: filter[:searchUrl],
+      }
+      puts data.to_yaml
     end
 
     help_registry.add(
