@@ -136,9 +136,9 @@ module JiraIntegration
     end
 
     help_registry.add(
-      :transitions,
+      :transition,
       "transition a issue to another state",
-      "transitions <issue_id> <state_id>"
+      "transition <issue_id> <state_id>"
     )
     def self.transition(issue_id, state_id, *args)
       data = JiraIntegration.api_client.transition(issue_id, state_id)
