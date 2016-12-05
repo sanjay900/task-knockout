@@ -82,8 +82,15 @@ module JiraIntegration
       # data = search[:issues].map{|i| {id: i[:id], key: i[:key], summary: i[:fields][:summary], description: i[:fields][:description]} }
       # data = search[:issues].map{|i| {id: i[:id], key: i[:key], summary: i[:fields][:summary]} }
       # puts data.to_yaml
-      data = search[:issues].map{|i| {key: i[:key], summary: i[:fields][:summary]} }
-      tp data, :key, summary: {width: 130}
+      data = search[:issues].map do |i|
+        {
+          key: i[:key],
+          type: i[:fields][:issuetype][:name],
+          status: i[:fields][:status][:name],
+          summary: i[:fields][:summary],
+        }
+      end
+      tp data, :key, {type: {width: 20}}, {status: {width: 20}}, summary: {width: 130}
     end
 
     help_registry.add(
