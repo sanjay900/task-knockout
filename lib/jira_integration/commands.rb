@@ -114,6 +114,7 @@ module JiraIntegration
     def self.issue(issue_id, *args)
       issue = JiraIntegration.api_client.issue(issue_id)
       fields = issue[:fields]
+      transitions = issue[:transitions]
       data = {
         key: issue[:key],
         summary: fields[:summary],
@@ -121,6 +122,7 @@ module JiraIntegration
         status: fields[:status][:name],
         creator: fields[:creator][:displayName],
         reporter: fields[:reporter][:displayName],
+        available_transitions: transitions.map{|t| t[:name] }
       }
       puts data.to_yaml
       puts "description: #{fields[:description]}"

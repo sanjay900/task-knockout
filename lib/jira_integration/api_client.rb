@@ -25,7 +25,12 @@ module JiraIntegration
 
     def issue(id)
       resource = build_resource('api/2/issue', id)
-      response = resource.get(params: {fields: 'summary,description,issuetype,created,status,creator,reporter'})
+      response = resource.get(
+        params: {
+          fields: 'summary,description,issuetype,created,status,creator,reporter,transitions',
+          expand: 'transitions',
+        },
+      )
       JSON.parse(response.body, symbolize_names: true)
     end
 
