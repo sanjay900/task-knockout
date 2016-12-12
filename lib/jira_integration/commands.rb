@@ -29,7 +29,7 @@ module JiraIntegration
       data = JiraIntegration.api_client.issue(issue_id)
       key = data[:key]
       if branch_name
-        branch_name = branch_name.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+        branch_name = commandify(branch_name)
         branch_name = "feature/#{key}-#{branch_name}"
       else
         branches = `git branch --no-color -a`.lines.map(&:strip)
@@ -41,7 +41,7 @@ module JiraIntegration
 
         if related_branches.empty?
           branch_name = data[:fields][:summary]
-          branch_name = branch_name.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+          branch_name = commandify(branch_name)
           branch_name = "feature/#{key}-#{branch_name}"
         elsif related_branches.size == 1
           branch_name = related_branches.first
@@ -176,6 +176,11 @@ module JiraIntegration
       puts data.to_yaml
     end
 
+    private
+
+    def self.commandify(str)
+      str.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+    end
 
   end
 end
