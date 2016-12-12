@@ -169,10 +169,28 @@ module JiraIntegration
     help_registry.add(
       :transition,
       "transition a issue to another state",
-      "transition <issue_id> <state_id>"
+      "transition <issue_id> <transition id or name>"
     )
-    def self.transition(issue_id, state_id, *args)
-      data = JiraIntegration.api_client.transition(issue_id, state_id)
+    def self.transition(issue_id, transition_id, *args)
+      if transition_id.match /[a-zA-Z]/
+        state_name = commandify(transition_id)
+        response = JiraIntegration.api_client.issue_transitions(issue_id)
+        matching_transitions = response[:transitions].select{|t| commandify(t[:name]).include?(state_name) }
+        if matching_transitions.size == 0
+          puts "Could not find matching transition for issue."
+          puts "Available transitions:"
+          puts response[:transitions].map{|t| t[:name] }.to_yaml
+          return
+        elsif matching_transitions.size == 1
+          transition_id = matching_transitions.first[:id]
+        else
+          puts "multiple transitions matched, please be more specific"
+          puts "matched transitions:"
+          puts matching_transitions.map{|t| t[:name] }.to_yaml
+          return
+        end
+      end
+      data = JiraIntegration.api_client.transition(issue_id, transition_id)
       puts data.to_yaml
     end
 
