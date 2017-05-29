@@ -1,25 +1,42 @@
+GIT
+  remote: https://github.com/rest-client/rest-client.git
+  revision: 8c3375b29931fbd97cdafdda7dfade6f5daf8947
+  specs:
+    rest-client (2.1.0.rc1)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+
 GEM
   remote: https://rubygems.org/
   specs:
-    coderay (1.1.0)
+    coderay (1.1.1)
+    domain_name (0.5.20170404)
+      unf (>= 0.0.5, < 1.0.0)
+    http-cookie (1.0.3)
+      domain_name (~> 0.5)
     method_source (0.8.2)
-    mime-types (1.25.1)
-    pry (0.9.12.6)
-      coderay (~> 1.0)
-      method_source (~> 0.8)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
+    netrc (0.11.0)
+    pry (0.10.4)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
       slop (~> 3.4)
-    rest-client (1.6.9)
-      mime-types (~> 1.16)
-    slop (3.4.7)
+    slop (3.6.0)
     table_print (1.5.6)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   pry
-  rest-client
+  rest-client!
   table_print
 
 BUNDLED WITH
-   1.13.6
+   1.14.5

@@ -4,5 +4,5 @@ source "https://rubygems.org"
 
 gem "pry"
 
-gem 'rest-client'
+gem 'rest-client', github: 'rest-client/rest-client'
 gem 'table_print'
