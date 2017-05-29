@@ -12,6 +12,7 @@ require 'rest-client'
 require 'base64'
 require 'json'
 require 'table_print'
+require 'logger'
 
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 

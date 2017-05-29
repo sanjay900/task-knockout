@@ -1,3 +1,7 @@
 :jira_host: company.atlassian.net
 :login: your@login.com
 :password: guessWhat
+:logger:
+  :level: :debug
+  :file: :stdout
+  # :file: log/development.log

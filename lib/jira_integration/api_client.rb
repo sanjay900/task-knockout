@@ -1,12 +1,13 @@
 module JiraIntegration
   class ApiClient
 
-    attr_accessor :jira_host, :login, :password
+    attr_accessor :jira_host, :login, :password, :logger
 
-    def initialize(jira_host:, login:, password:)
+    def initialize(jira_host:, login:, password:, logger:)
       self.jira_host = jira_host
       self.login = login
       self.password = password
+      self.logger = logger
     end
 
     def jira_url
@@ -69,7 +70,8 @@ module JiraIntegration
         filter[:searchUrl],
         headers: {
           "Authorization" => "Basic #{credentials}"
-        }
+        },
+        log: logger,
       )
       response = resource.get
       JSON.parse(response.body, symbolize_names: true)
@@ -80,7 +82,8 @@ module JiraIntegration
         resource_url(*resource_path),
         headers: {
           "Authorization" => "Basic #{credentials}"
-        }
+        },
+        log: logger,
       )
     end
 
