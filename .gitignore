@@ -1,2 +1,4 @@
 
 config/environments.yml
+vendor/
+.bundle
