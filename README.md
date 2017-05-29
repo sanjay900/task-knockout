@@ -29,9 +29,9 @@ add it to your PATH.
 This project will (soon) be split in two:
   - A Jira only command line client
   - A command line integration for jira, git and github workflows.
-  
+
 After such split this repository will become the jira client cappable of drive some of the jira features through command line.
 
 ## Notes:
 
-Still in heavy development: lots WILL change.
+Still in development: something might change.
