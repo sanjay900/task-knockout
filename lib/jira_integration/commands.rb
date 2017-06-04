@@ -149,6 +149,17 @@ module JiraIntegration
     end
 
     help_registry.add(
+      :pull_request,
+      "[NYI] create pull request for issue",
+      "pull_request <issue_id> [branch_name]"
+    )
+    def self.pull_request
+      branch_name = 'feature/AD-1282-something-done'
+      "git push --set-upstream origin '#{branch_name}'"
+      "hub pull-request -m 'AD-1282: fix form preview' -b 'develop' -h '#{branch_name}'"
+    end
+
+    help_registry.add(
       :show_filter,
       "print information about the informed filter",
       "filters"
