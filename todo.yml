@@ -1,0 +1,44 @@
+clients:
+  - jira
+  - git
+  - hub [github]
+  - toggl
+  - ko
+  - git town
+
+jira_commands:
+  - list filters
+  - show filter details
+  - list filtered issues
+  - show issue
+  - list available issue transitions
+  - execute issue transition
+  - assign issue (NYI)
+
+git_commands:
+  - find branch by "type/*" or "*/name-*" [git]
+  - (change to or) create branch [git]
+  - push (or sync) branch [git]
+  - get current branch name [git]
+
+github_commands:
+  - create pull request [hub]
+
+worflow_commands: # (Knock-out, ko)
+  - objectively list tasks [jira_command]
+  - start task: # ko start AD-123
+    - transition task to started [jira_command]
+    - assign task to myself [jira_command]
+    - figure branch name
+    - (change to or) create branch [git]
+  - finish task: # ko finish [optional:AD-123]
+    - discover task by provided param or current branch name
+    - figure branch name
+    - if branch exists:
+      - change to branch
+      - sync branch
+      - create pull request
+      - transition task to code review
+    - else:
+      - transition task to code review (??? really, without a code to be reviewed?)
+      - verify assignment after transition (who will code review)
