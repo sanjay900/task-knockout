@@ -38,6 +38,5 @@ end
 
 require 'jira_integration/help'
 require 'jira_integration/cli'
-require 'jira_integration/commands'
 require 'jira_integration/api_client'
 require 'jira_integration/version'

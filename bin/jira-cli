@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 require_relative '../config/boot'
 
-JiraIntegration::Cli.run *ARGV
+JiraIntegration::Cli.start ARGV

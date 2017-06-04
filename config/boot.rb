@@ -7,6 +7,7 @@ require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
 
 require 'pry'
 
+require 'thor'
 require 'yaml'
 require 'rest-client'
 require 'base64'
