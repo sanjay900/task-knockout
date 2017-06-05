@@ -17,6 +17,6 @@ require 'logger'
 
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
-require_relative '../lib/jira_integration'
+require_relative '../lib/task_knockout'
 
-JiraIntegration.config = YAML.load_file(File.expand_path('../environments.yml', __FILE__))
+TaskKnockout.config = YAML.load_file(File.expand_path('../environments.yml', __FILE__))

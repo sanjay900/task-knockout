@@ -1,4 +1,4 @@
-module JiraIntegration
+module TaskKnockout
   class ApiClient
 
     attr_accessor :jira_host, :login, :password, :logger

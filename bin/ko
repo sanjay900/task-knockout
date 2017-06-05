@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 require_relative '../config/boot'
 
-JiraIntegration::Cli.start ARGV
+TaskKnockout::Cli.start ARGV

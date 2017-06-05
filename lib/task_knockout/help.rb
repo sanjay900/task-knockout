@@ -1,4 +1,4 @@
-module JiraIntegration
+module TaskKnockout
   module Help
 
     def help_registry

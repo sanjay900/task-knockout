@@ -1,4 +1,4 @@
-module JiraIntegration
+module TaskKnockout
 
   def self.config=(value)
     @config = value
@@ -36,7 +36,7 @@ module JiraIntegration
 
 end
 
-require 'jira_integration/help'
-require 'jira_integration/cli'
-require 'jira_integration/api_client'
-require 'jira_integration/version'
+require 'task_knockout/help'
+require 'task_knockout/cli'
+require 'task_knockout/api_client'
+require 'task_knockout/version'
