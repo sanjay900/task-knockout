@@ -5,7 +5,7 @@ module JiraIntegration
     option :branch_from, type: :string, default: "develop", desc: "base branch for ne branch"
     option :branch_name, type: :string, desc: "description appended to branch name after its task id"
     def branch(issue_id)
-      data = JiraIntegration.api_client.issue(issue_id)
+      data = JiraIntegration.api_client.issue(issue_id, fields: ['summary'])
       key = data[:key]
       if options[:branch_name]
         branch_name = commandify(options[:branch_name])
@@ -75,7 +75,10 @@ module JiraIntegration
 
     desc "issue <issue_id>", "print information about specified issue"
     def issue(issue_id)
-      issue = JiraIntegration.api_client.issue(issue_id)
+      issue = JiraIntegration.api_client.issue(issue_id,
+        fields: ['summary', 'description', 'issuetype', 'created', 'status', 'creator', 'reporter', 'transitions'],
+        expand: ['transitions'],
+      )
       fields = issue[:fields]
       transitions = issue[:transitions]
       data = {
