@@ -35,8 +35,12 @@ module TaskKnockout
 
     desc "branches <issue_id>", "list existing branches for issue"
     def branches(issue_id)
-      data = TaskKnockout.api_client.issue(issue_id)
-      key = data[:key]
+      data = `jira-cli issue #{issue_id} --format=json 2> /dev/null | jq -r .key`
+      key = data.strip
+      if key.empty?
+        puts "issue_id not found"
+        exit(1)
+      end
 
       branches = `git branch --no-color -a`.lines.map(&:strip)
       branches = branches.map{|b| b.sub(/^\*\s+/, '').sub(/^remotes\/[^\/]+\//, '') }
