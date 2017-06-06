@@ -36,7 +36,6 @@ module TaskKnockout
 
 end
 
-require 'task_knockout/help'
 require 'task_knockout/cli'
 require 'task_knockout/api_client'
 require 'task_knockout/version'
