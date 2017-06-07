@@ -24,18 +24,7 @@ module TaskKnockout
       end
     end
   end
-
-  def self.api_client
-    @api_client ||= ApiClient.new(
-      jira_host: config[:jira_host],
-      login: config[:login],
-      password: config[:password],
-      logger: logger,
-    )
-  end
-
 end
 
 require 'task_knockout/cli'
-require 'task_knockout/api_client'
 require 'task_knockout/version'
