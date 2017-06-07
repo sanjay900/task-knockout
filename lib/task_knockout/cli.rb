@@ -5,8 +5,16 @@ module TaskKnockout
     option :branch_from, type: :string, default: "develop", desc: "base branch for ne branch"
     option :branch_name, type: :string, desc: "description appended to branch name after its task id"
     def branch(issue_id)
-      data = TaskKnockout.api_client.issue(issue_id, fields: ['summary'])
-      key = data[:key]
+      data_str = Bundler.with_clean_env do
+        `jira-cli issue #{issue_id} --format=json 2> /dev/null || echo "{}"`
+      end
+      data = JSON.parse(data_str, symbolize_names: true)
+
+      key = data.fetch(:key) do
+        puts "issue_id not found"
+        exit(1)
+      end
+
       if options[:branch_name]
         branch_name = commandify(options[:branch_name])
         branch_name = "feature/#{key}-#{branch_name}"
@@ -19,7 +27,17 @@ module TaskKnockout
         related_branches = branches.grep(search_regexp)
 
         if related_branches.empty?
-          branch_name = data[:fields][:summary]
+          fields = data.fetch(:fields) do
+            puts "failed to retrieve issue fields"
+            exit(1)
+          end
+
+          summary = fields.fetch(:summary) do
+            puts "failed to retrieve issue summary field"
+            exit(1)
+          end
+
+          branch_name = summary
           branch_name = commandify(branch_name)
           branch_name = "feature/#{key}-#{branch_name}"
         elsif related_branches.size == 1
@@ -35,9 +53,11 @@ module TaskKnockout
 
     desc "branches <issue_id>", "list existing branches for issue"
     def branches(issue_id)
-      data = `jira-cli issue #{issue_id} --format=json 2> /dev/null | jq -r .key`
-      key = data.strip
-      if key.empty?
+      data_str = Bundler.with_clean_env do
+        `jira-cli issue #{issue_id} --format=json 2> /dev/null || echo "{}"`
+      end
+      data = JSON.parse(data_str, symbolize_names: true)
+      key = data.fetch(:key) do
         puts "issue_id not found"
         exit(1)
       end
