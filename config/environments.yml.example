@@ -1,3 +1,6 @@
+:toggl:
+  :api_token: token from toggl
+  :workspace: workspace name
 :logger:
   :level: :debug
   :file: :stdout
