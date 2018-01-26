@@ -1,6 +1,10 @@
 :toggl:
   :api_token: token from toggl
   :workspace: workspace name
+:jira:
+  :jira_host: company.atlassian.net
+  :login: your@login.com
+  :password: guessWhat
 :logger:
   :level: :debug
   :file: :stdout
