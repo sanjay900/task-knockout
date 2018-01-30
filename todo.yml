@@ -24,7 +24,7 @@ git_commands:
 github_commands:
   - create pull request [hub]
 
-worflow_commands: # (Knock-out, ko)
+workflow_commands: # (Knock-out, ko)
   - objectively list tasks [jira_command]
   - start task: # ko start AD-123
     - transition task to started [jira_command]

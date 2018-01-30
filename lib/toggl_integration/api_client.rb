@@ -30,7 +30,6 @@ module TogglIntegration
       map = {
         time_entry: {
           description: description,
-          billable: true,
           start: Time.now.getutc.strftime('%Y-%m-%dT%H:%M:%S.%LZ'),
           pid: project_list[project]['id'],
           created_with: 'Toggl Integration'

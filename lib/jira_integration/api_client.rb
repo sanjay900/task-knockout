@@ -35,15 +35,39 @@ module JiraIntegration
       JSON.parse(response.body, symbolize_names: true)
     end
 
+    def metadata(id)
+      resource = build_resource('api/2/issue', id, 'editmeta')
+      response = resource.get()
+      JSON.parse(response.body, symbolize_names: true)
+    end
+
     def issue_transitions(id)
       resource = build_resource('api/2/issue', id, 'transitions')
       response = resource.get
       JSON.parse(response.body, symbolize_names: true)
     end
 
-    def transition(issue_id, state_id)
+    def transition(issue_id, transition_id)
+      if transition_id.match /[a-zA-Z]/
+        state_name = commandify(transition_id)
+        response = JiraIntegration.api_client.issue_transitions(issue_id)
+        matching_transitions = response[:transitions].select{|t| commandify(t[:name]).include?(state_name) }
+        if matching_transitions.size == 0
+          puts "Could not find matching transition for issue."
+          puts "Available transitions:"
+          puts response[:transitions].map{|t| t[:name] }.to_yaml
+          return
+        elsif matching_transitions.size == 1
+          transition_id = matching_transitions.first[:id]
+        else
+          puts "multiple transitions matched, please be more specific"
+          puts "matched transitions:"
+          puts matching_transitions.map{|t| t[:name] }.to_yaml
+          return
+        end
+      end
       resource = build_resource('api/2/issue', issue_id, 'transitions')
-      response = resource.post({transition: {id: state_id}}.to_json, content_type: :json)
+      response = resource.post({transition: {id: transition_id}}.to_json, content_type: :json)
       if response.code == 204
         true
       else
@@ -90,6 +114,8 @@ module JiraIntegration
     def credentials
       Base64.encode64 "#{login}:#{password}"
     end
-
+    def commandify(str)
+      str.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+    end
   end
 end
