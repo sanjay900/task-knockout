@@ -17,7 +17,7 @@ module JiraIntegration
         }
       end
       # tp data, :key, {type: {width: 20}}, {status: {width: 20}}, summary: {width: 130}
-      print_data data
+      Utils.print_data data, options
     end
 
     desc "filters", "print current user existing filters"
@@ -27,7 +27,7 @@ module JiraIntegration
       # puts data.to_yaml
       # data = data.map{|f| {id: f[:id], name: f[:name]}}
       # tp data
-      print_data data
+      Utils.print_data data, options
     end
 
     desc "issue <issue_id>", "print information about specified issue"
@@ -49,21 +49,21 @@ module JiraIntegration
       # }
       # puts data.to_yaml
       # puts "description: #{fields[:description]}"
-      print_data(issue)
+      Utils.print_data issue, options
     end
 
     desc "issue_transitions <issue_id>", "list available transitions for specified issue"
     def issue_transitions(issue_id)
       data = JiraIntegration.api_client.issue_transitions(issue_id)
       data = data[:transitions].map{|f| {id: f[:id], name: f[:name]} }
-      print_data(data)
+      Utils.print_data data, options
     end
 
     desc "myself", "print print information about current user"
     def myself
       data = JiraIntegration.api_client.myself
       # puts `echo '#{data.to_json}' | jq .`
-      print_data data
+      Utils.print_data data, options
     end
 
     desc "show_filter", "print information about the informed filter"
@@ -77,56 +77,13 @@ module JiraIntegration
         viewUrl: filter[:viewUrl],
         # searchUrl: filter[:searchUrl],
       }
-      print_data data
+      Utils.print_data data, options
     end
 
     desc "transition <issue_id> <transition id or name>", "transition a issue to another state"
     def transition(issue_id, transition_id)
       data = JiraIntegration.api_client.transition(issue_id, transition_id)
-      print_data data
-    end
-
-    private
-
-    def commandify(str)
-      str.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
-    end
-
-    def print_data(data)
-      if options[:format] == 'json'
-        puts data.to_json
-      elsif options[:format] == 'yaml'
-        puts data.to_yaml
-      elsif options[:format] == 'kv'
-        to_kv(data).each do |k, v|
-          puts "#{k}: #{v}"
-        end
-      elsif options[:format] == "tp"
-        tp data
-      end
-    end
-
-    def to_kv(data)
-      to_kv_items(nil, data).flatten.reduce({}){|o, i| o.merge i}
-    end
-
-    def to_kv_items(root, data)
-      if data.respond_to? :each
-        if data.respond_to? :has_key?
-          join_char = if root && root[-1] != ']'
-            '.'
-          end
-          data.map do |k, v|
-            to_kv_items([root, k].select{|p| p}.join(join_char), v)
-          end
-        else
-          data.each_with_index.map do |v, i|
-            to_kv_items("#{root}[#{i}]", v)
-          end
-        end
-      else
-        [{root => data}]
-      end
+      Utils.print_data data, options
     end
   end
 end

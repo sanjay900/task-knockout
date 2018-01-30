@@ -129,8 +129,5 @@ module JiraIntegration
     def credentials
       Base64.encode64 "#{login}:#{password}"
     end
-    def commandify(str)
-      str.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
-    end
   end
 end

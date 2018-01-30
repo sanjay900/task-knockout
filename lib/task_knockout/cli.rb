@@ -23,7 +23,7 @@ module TaskKnockout
       end
       TogglIntegration.api_client.add_entry "[#{issue_id}] - #{summary}", epic
       ret = { epic: epic, branch: branch(issue_id) }
-      print_data ret
+      Utils.print_data ret, options
     end
 
     desc 'branch <issue_id> [branch name] [--branch-from=develop]', 'create branch for issue'
@@ -59,7 +59,7 @@ module TaskKnockout
           end
 
           branch_name = summary
-          branch_name = commandify(branch_name)
+          branch_name = Utils.commandify(branch_name)
           branch_name = "feature/#{key}-#{branch_name}"
         elsif related_branches.size == 1
           branch_name = related_branches.first
@@ -101,45 +101,5 @@ module TaskKnockout
     end
 
     private
-
-    def commandify(str)
-      str.downcase.gsub(/[^a-z0-9]/, '-').gsub(/-+/, '-').gsub(/^-/, '').gsub(/-$/, '')
-    end
-    def print_data(data)
-      if options[:format] == 'json'
-        puts data.to_json
-      elsif options[:format] == 'yaml'
-        puts data.to_yaml
-      elsif options[:format] == 'kv'
-        to_kv(data).each do |k, v|
-          puts "#{k}: #{v}"
-        end
-      elsif options[:format] == 'tp'
-        tp data
-      end
-    end
-
-    def to_kv(data)
-      to_kv_items(nil, data).flatten.reduce({}){|o, i| o.merge i}
-    end
-
-    def to_kv_items(root, data)
-      if data.respond_to? :each
-        if data.respond_to? :has_key?
-          join_char = if root && root[-1] != ']'
-                        '.'
-                      end
-          data.map do |k, v|
-            to_kv_items([root, k].select{ |p| p }.join(join_char), v)
-          end
-        else
-          data.each_with_index.map do |v, i|
-            to_kv_items("#{root}[#{i}]", v)
-          end
-        end
-      else
-        [{root => data}]
-      end
-    end
   end
 end

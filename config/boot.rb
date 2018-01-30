@@ -16,6 +16,7 @@ require 'logger'
 
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
+require_relative '../lib/utils'
 require_relative '../lib/task_knockout'
 require_relative '../lib/toggl_integration'
 require_relative '../lib/jira_integration'
