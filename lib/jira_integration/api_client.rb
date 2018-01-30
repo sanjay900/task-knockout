@@ -75,6 +75,21 @@ module JiraIntegration
       end
     end
 
+    def epic(issue_id)
+      # We need to find the epic name
+      epic_field = custom_field issue_id, 'com.pyxis.greenhopper.jira:gh-epic-link'
+      custom_field epic_field, 'com.pyxis.greenhopper.jira:gh-epic-label'
+    end
+
+    def custom_field(issue_id, key)
+      data = JiraIntegration.api_client.metadata issue_id
+      data[:fields].each do |field, f_data|
+        next unless f_data[:schema][:custom] == key
+        epic_data = JiraIntegration.api_client.issue(issue_id, fields: [field])
+        return epic_data[:fields][field]
+      end
+    end
+
     def my_filters
       resource = build_resource('api/2/filter', 'my')
       response = resource.get
