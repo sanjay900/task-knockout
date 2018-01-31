@@ -17,7 +17,7 @@ module TaskKnockout
     option :branch_from, type: :string, default: 'develop', desc: 'base branch for the branch'
     option :branch_name, type: :string, desc: 'description appended to branch name after its task id'
     def start(issue_id)
-      # JiraIntegration.api_client.transition(issue_id, 'Start dev')
+      JiraIntegration.api_client.transition(issue_id, 'Start dev')
       epic = JiraIntegration.api_client.epic issue_id
       if epic.nil?
         puts "Unable to find epic for #{issue_id}"
@@ -55,9 +55,9 @@ module TaskKnockout
       end
       id = current['id']
       TogglIntegration.api_client.stop_entry id
-      `git push --set-upstream origin #{branch}`
+      `git push --set-upstream origin #{branch issue_id}`
       pull_request
-      # JiraIntegration.api_client.transition(issue_id, 'Dev complete')
+      JiraIntegration.api_client.transition(issue_id, 'Dev complete')
 
     end
 
@@ -146,7 +146,7 @@ module TaskKnockout
       issue_id = options[:issue_id]
       if issue_id.nil?
         branch = `git branch 2> /dev/null`
-        issue_id = branch.match(%r{/\* feature\/([A-z0-9]+-[A-z0-9]+)/}).captures!.first!
+        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
       end
       if issue_id.nil?
         puts 'Unable to infer issue id'
