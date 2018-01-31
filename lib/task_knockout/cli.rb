@@ -136,8 +136,8 @@ module TaskKnockout
       puts github.authorize_url redirect_uri: 'http://localhost:8123', scope: 'repo'
       # start a local web server to listen to the callback from github's oauth api
       start_server
-
     end
+
     desc 'pull_request [issue_id] [branch_from] [--branch_to=develop]', 'Create a pull request for an issue'
     option :branch_from, type: :string, desc: 'the branch to merge'
     option :branch_to, type: :string, default: 'develop', desc: 'the branch to merge into'
