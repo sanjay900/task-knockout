@@ -65,18 +65,17 @@ module TaskKnockout
 
     end
 
-    desc 'branch <issue_id> [branch name] [--branch-from=develop]', 'create branch for issue'
-    option :branch_from, type: :string, default: 'develop', desc: 'base branch for the branch'
-    option :branch_name, type: :string, desc: 'description appended to branch name after its task id'
-    def branch(issue_id)
+    desc "branch <issue_id> [branch name] [--branch-from=develop]", "create branch for issue"
+    option :branch_from, type: :string, default: "develop", desc: "base branch for ne branch"
+    def branch(issue_id, branch_name = nil)
       data = JiraIntegration.api_client.issue issue_id
       key = data.fetch(:key) do
         puts 'issue_id not found'
         exit(1)
       end
 
-      if options[:branch_name]
-        branch_name = commandify(options[:branch_name])
+      if branch_name
+        branch_name = Util.commandify(branch_name)
         branch_name = "feature/#{key}-#{branch_name}"
       else
         branches = `git branch --no-color -a`.lines.map(&:strip)
