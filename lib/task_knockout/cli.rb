@@ -1,4 +1,16 @@
 module TaskKnockout
+  class CodeRetriever < WEBrick::HTTPServlet::AbstractServlet
+    def do_GET(request, response)
+      response.status = 200
+      @server.shutdown
+      code = request.query['code']
+      config_file = File.expand_path('../../../config/environments.yml', __FILE__)
+      puts code
+      github = Github.new TaskKnockout.config[:github]
+      TaskKnockout.config[:github][:oauth_token] = github.get_token(code).token
+      File.write(config_file, TaskKnockout.config.to_yaml)
+    end
+  end
   class Cli < Thor
     class_option :format, type: :string, default: 'kv', desc: 'output format for query commands: json, yaml, kv or tp'
     desc 'start <issue_id> [branch name] [--branch-from=develop]', 'Start working on a task.'
@@ -24,6 +36,30 @@ module TaskKnockout
       TogglIntegration.api_client.add_entry "[#{issue_id}] - #{summary}", epic
       ret = { epic: epic, branch: branch(issue_id) }
       Utils.print_data ret, options
+    end
+
+    desc 'stop [issue_id]', 'stop working on a task'
+    option :issue_id, type: :string, desc: 'The issue to stop working on. Will be inferred from the current branch if missing.'
+    def stop
+      issue_id = options[:issue_id]
+      if issue_id.nil?
+        branch = `git branch 2> /dev/null`
+        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
+      end
+      if issue_id.nil?
+        puts 'Unable to infer issue id'
+        return
+      end
+      puts issue_id
+      current = TogglIntegration.api_client.current_entry['data']
+      if current.nil?
+        puts 'No task was running.'
+        return
+      end
+      id = current['id']
+      TogglIntegration.api_client.stop_entry id
+      `git push`
+
     end
 
     desc 'branch <issue_id> [branch name] [--branch-from=develop]', 'create branch for issue'
@@ -93,13 +129,67 @@ module TaskKnockout
       puts related_branches.join("\n")
     end
 
-    desc 'pull_request <issue_id> [branch_name]', '[NYI] create pull request for issue'
+    desc 'setup_github', 'Set up github'
+    def setup_github
+      github = Github.new TaskKnockout.config[:github]
+      puts 'Please navigate to the following url, and then add the code to your configuration file.'
+      puts github.authorize_url redirect_uri: 'http://localhost:8123', scope: 'repo'
+      # start a local web server to listen to the callback from github's oauth api
+      start_server
+
+    end
+    desc 'pull_request [issue_id] [branch_from] [--branch_to=develop]', 'Create a pull request for an issue'
+    option :branch_from, type: :string, desc: 'the branch to merge'
+    option :branch_to, type: :string, default: 'develop', desc: 'the branch to merge into'
     def pull_request
-      branch_name = 'feature/AD-1282-something-done'
-      `git push --set-upstream origin '#{branch_name}'`
-      `hub pull-request -m 'AD-1282: fix form preview' -b 'develop' -h '#{branch_name}'`
+      issue_id = options[:issue_id]
+      if issue_id.nil?
+        branch = `git branch 2> /dev/null`
+        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
+      end
+      if issue_id.nil?
+        puts 'Unable to infer issue id'
+        return
+      end
+      branch_name = options[:branch_from]
+      branch_name = branch issue_id if branch_name.nil?
+      pulls = Github::Client::PullRequests.new TaskKnockout.config[:github]
+      repo_name = `git config --get remote.origin.url`
+      repo_name = `basename -s .git #{repo_name}`
+      body_file = `git rev-parse --show-toplevel`
+      repo_name = repo_name.strip!
+      body_file = body_file.strip!
+      body_file += '/.github/PULL_REQUEST_TEMPLATE.md'
+      body = File.read(body_file)
+      body.gsub! 'AD-N', issue_id
+      ret = {
+        user_name: TaskKnockout.config[:github][:user_name],
+        repo_name: repo_name,
+        title: "[#{issue_id}] ",
+        body: body,
+        head: branch_name,
+        base: options[:branch_to]
+      }
+      Utils.print_data ret, options
+      pulls.create TaskKnockout.config[:github][:user_name], repo_name,
+                   title: "[#{issue_id}] ",
+                   body: body,
+                   head: branch_name,
+                   base: options[:branch_to]
+      # `git push --set-upstream origin '#{branch_name}'`
+      # `hub pull-request -m 'AD-1282: fix form preview' -b 'develop' -h '#{branch_name}'`
+    end
+    private
+
+    def github
+      @github ||= Github.new TaskKnockout.config[:github]
     end
 
-    private
+    def start_server
+      server = WEBrick::HTTPServer.new(Port: 8123)
+      server.mount '/', CodeRetriever
+      trap 'INT' do server.shutdown end
+      server.start
+    end
   end
 end
