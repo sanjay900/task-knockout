@@ -143,8 +143,7 @@ module TaskKnockout
     desc 'pull_request [issue_id] [branch_from] [--branch_to=develop]', 'Create a pull request for an issue'
     option :branch_from, type: :string, desc: 'the branch to merge'
     option :branch_to, type: :string, default: 'develop', desc: 'the branch to merge into'
-    def pull_request
-      issue_id = options[:issue_id]
+    def pull_request(issue_id = nil)
       if issue_id.nil?
         branch = `git branch 2> /dev/null`
         issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
