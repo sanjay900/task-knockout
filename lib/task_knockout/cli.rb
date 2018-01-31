@@ -151,6 +151,7 @@ module TaskKnockout
         puts 'Unable to infer issue id'
         return
       end
+      issue = JiraIntegration.api_client.issue issue_id, fields: ['summary']
       branch_name = options[:branch_from]
       branch_name = branch issue_id if branch_name.nil?
       pulls = Github::Client::PullRequests.new TaskKnockout.config[:github]
@@ -165,20 +166,20 @@ module TaskKnockout
       ret = {
         user_name: TaskKnockout.config[:github][:user_name],
         repo_name: repo_name,
-        title: "[#{issue_id}] ",
+        title: "[#{issue_id}] #{issue[:fields][:summary]}",
         body: body,
         head: branch_name,
         base: options[:branch_to]
       }
+      req = pulls.create ret[:user_name], ret[:repo_name],
+                         title: ret[:title],
+                         body: ret[:body],
+                         head: ret[:head],
+                         base: ret[:base]
+      ret[:url] = req[:_links][:html][:href]
       Utils.print_data ret, options
-      pulls.create TaskKnockout.config[:github][:user_name], repo_name,
-                   title: "[#{issue_id}] ",
-                   body: body,
-                   head: branch_name,
-                   base: options[:branch_to]
-      # `git push --set-upstream origin '#{branch_name}'`
-      # `hub pull-request -m 'AD-1282: fix form preview' -b 'develop' -h '#{branch_name}'`
     end
+
     private
 
     def github
