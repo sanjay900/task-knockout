@@ -5,6 +5,11 @@
   :jira_host: company.atlassian.net
   :login: your@login.com
   :password: guessWhat
+:github:
+  :user_name: sanjay900
+  :oauth_token: will-be-autofilled
+  :client_id: 12474d3174ff70e7d6aa
+  :client_secret:
 :logger:
   :level: :debug
   :file: :stdout
