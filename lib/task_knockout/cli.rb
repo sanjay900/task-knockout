@@ -143,11 +143,11 @@ module TaskKnockout
     desc 'pull_request [issue_id] [branch_from] [--branch_to=develop]', 'Create a pull request for an issue'
     option :branch_from, type: :string, desc: 'the branch to merge'
     option :branch_to, type: :string, default: 'develop', desc: 'the branch to merge into'
-    def pull_request
-      issue_id = options[:issue_id]
+    def pull_request(issue_id = nil)
       if issue_id.nil?
-        branch = `git branch 2> /dev/null`
-        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
+        branch = `git rev-parse --abbrev-ref HEAD`
+        matched_issue_data = branch.match(/feature\/(?<issue_id>[A-z0-9]+-[A-z0-9]+)/)
+        issue_id = matched_issue_data && matched_issue_data[:issue_id]
       end
       if issue_id.nil?
         puts 'Unable to infer issue id'
@@ -157,22 +157,24 @@ module TaskKnockout
       branch_name = options[:branch_from]
       branch_name = branch issue_id if branch_name.nil?
       pulls = Github::Client::PullRequests.new TaskKnockout.config[:github]
-      repo_name = `git config --get remote.origin.url`
-      repo_name = `basename -s .git #{repo_name}`
-      repo_name = repo_name.strip!
+      origin_url = `git config --get remote.origin.url`.strip
+      matched_repo_data = origin_url.match(/(?<username>[^\/:.]+)\/(?<repo_name>[^\/:.]+)(.git)?$/)
+      if ! matched_repo_data
+        raise "could not infer github repo to create pull request"
+      end
       body_file = File.expand_path('../../../PULL_REQUEST_TEMPLATE.md', __FILE__)
       body = File.read(body_file)
       body.gsub! 'TM-N', issue_id
       ret = {
-        user_name: TaskKnockout.config[:github][:user_name],
-        repo_name: repo_name,
-        title: "[#{issue_id}] #{issue[:fields][:summary]}",
+        username: matched_repo_data[:username],
+        repo_name: matched_repo_data[:repo_name],
+        title: "#{issue_id} - #{issue[:fields][:summary]}",
         body: body,
         head: branch_name,
         base: options[:branch_to]
       }
       Utils.print_data ret, options
-      req = pulls.create ret[:user_name], ret[:repo_name],
+      req = pulls.create ret[:username], ret[:repo_name],
                          title: ret[:title],
                          body: ret[:body],
                          head: ret[:head],
