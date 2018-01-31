@@ -34,11 +34,15 @@ module TaskKnockout
         exit(1)
       end
       TogglIntegration.api_client.add_entry "[#{issue_id}] - #{summary}", epic
+      `git checkout develop`
+      `git pull`
       ret = { epic: epic, branch: branch(issue_id) }
       Utils.print_data ret, options
     end
 
-    desc 'stop', 'stop working on a task. The task is inferred from the current branch,'
+    desc 'stop [branch_from] [--branch_to=develop]', 'stop working on a task. The task is inferred from the current branch,'
+    option :branch_from, type: :string, desc: 'the branch to merge'
+    option :branch_to, type: :string, default: 'develop', desc: 'the branch to merge into'
     def stop
       branch = `git branch 2> /dev/null`
       issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/)
@@ -65,8 +69,6 @@ module TaskKnockout
     option :branch_from, type: :string, default: 'develop', desc: 'base branch for the branch'
     option :branch_name, type: :string, desc: 'description appended to branch name after its task id'
     def branch(issue_id)
-      `git checkout develop`
-      `git pull`
       data = JiraIntegration.api_client.issue issue_id
       key = data.fetch(:key) do
         puts 'issue_id not found'
@@ -170,6 +172,7 @@ module TaskKnockout
         head: branch_name,
         base: options[:branch_to]
       }
+      Utils.print_data ret, options
       req = pulls.create ret[:user_name], ret[:repo_name],
                          title: ret[:title],
                          body: ret[:body],
