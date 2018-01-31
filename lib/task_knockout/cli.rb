@@ -17,7 +17,7 @@ module TaskKnockout
     option :branch_from, type: :string, default: 'develop', desc: 'base branch for the branch'
     option :branch_name, type: :string, desc: 'description appended to branch name after its task id'
     def start(issue_id)
-      # JiraIntegration.api_client.transition(issue_id, "Start Dev")
+      # JiraIntegration.api_client.transition(issue_id, 'Start dev')
       epic = JiraIntegration.api_client.epic issue_id
       if epic.nil?
         puts "Unable to find epic for #{issue_id}"
@@ -38,18 +38,15 @@ module TaskKnockout
       Utils.print_data ret, options
     end
 
-    desc 'stop [issue_id]', 'stop working on a task'
-    option :issue_id, type: :string, desc: 'The issue to stop working on. Will be inferred from the current branch if missing.'
+    desc 'stop', 'stop working on a task. The task is inferred from the current branch,'
     def stop
-      issue_id = options[:issue_id]
-      if issue_id.nil?
-        branch = `git branch 2> /dev/null`
-        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
-      end
+      branch = `git branch 2> /dev/null`
+      issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/)
       if issue_id.nil?
         puts 'Unable to infer issue id'
         return
       end
+      issue_id = issue_id.captures.first
       puts issue_id
       current = TogglIntegration.api_client.current_entry['data']
       if current.nil?
@@ -58,7 +55,9 @@ module TaskKnockout
       end
       id = current['id']
       TogglIntegration.api_client.stop_entry id
-      `git push`
+      `git push --set-upstream origin #{branch}`
+      pull_request
+      # JiraIntegration.api_client.transition(issue_id, 'Dev complete')
 
     end
 
@@ -66,6 +65,8 @@ module TaskKnockout
     option :branch_from, type: :string, default: 'develop', desc: 'base branch for the branch'
     option :branch_name, type: :string, desc: 'description appended to branch name after its task id'
     def branch(issue_id)
+      `git checkout develop`
+      `git pull`
       data = JiraIntegration.api_client.issue issue_id
       key = data.fetch(:key) do
         puts 'issue_id not found'
@@ -145,7 +146,7 @@ module TaskKnockout
       issue_id = options[:issue_id]
       if issue_id.nil?
         branch = `git branch 2> /dev/null`
-        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
+        issue_id = branch.match(%r{/\* feature\/([A-z0-9]+-[A-z0-9]+)/}).captures!.first!
       end
       if issue_id.nil?
         puts 'Unable to infer issue id'
@@ -157,12 +158,10 @@ module TaskKnockout
       pulls = Github::Client::PullRequests.new TaskKnockout.config[:github]
       repo_name = `git config --get remote.origin.url`
       repo_name = `basename -s .git #{repo_name}`
-      body_file = `git rev-parse --show-toplevel`
       repo_name = repo_name.strip!
-      body_file = body_file.strip!
-      body_file += '/.github/PULL_REQUEST_TEMPLATE.md'
+      body_file = File.expand_path('../../../PULL_REQUEST_TEMPLATE.md', __FILE__)
       body = File.read(body_file)
-      body.gsub! 'AD-N', issue_id
+      body.gsub! 'TM-N', issue_id
       ret = {
         user_name: TaskKnockout.config[:github][:user_name],
         repo_name: repo_name,
