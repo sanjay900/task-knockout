@@ -49,9 +49,9 @@ module JiraIntegration
 
     def transition(issue_id, transition_id)
       if transition_id.match /[a-zA-Z]/
-        state_name = commandify(transition_id)
+        state_name = Utils.commandify transition_id
         response = JiraIntegration.api_client.issue_transitions(issue_id)
-        matching_transitions = response[:transitions].select{|t| commandify(t[:name]).include?(state_name) }
+        matching_transitions = response[:transitions].select{|t| Utils.commandify(t[:name]).include?(state_name) }
         if matching_transitions.size == 0
           puts "Could not find matching transition for issue."
           puts "Available transitions:"
