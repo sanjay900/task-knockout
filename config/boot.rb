@@ -13,6 +13,8 @@ require 'thor'
 require 'yaml'
 require 'json'
 require 'logger'
+require 'github_api'
+require 'webrick'
 
 $LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
