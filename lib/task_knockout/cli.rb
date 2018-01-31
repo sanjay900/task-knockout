@@ -157,22 +157,24 @@ module TaskKnockout
       branch_name = options[:branch_from]
       branch_name = branch issue_id if branch_name.nil?
       pulls = Github::Client::PullRequests.new TaskKnockout.config[:github]
-      repo_name = `git config --get remote.origin.url`
-      repo_name = `basename -s .git #{repo_name}`
-      repo_name = repo_name.strip!
+      origin_url = `git config --get remote.origin.url`.strip
+      matched_repo_data = origin_url.match(/(?<username>[^\/:.]+)\/(?<repo_name>[^\/:.]+)(.git)?$/)
+      if ! matched_repo_data
+        raise "could not infer github repo to create pull request"
+      end
       body_file = File.expand_path('../../../PULL_REQUEST_TEMPLATE.md', __FILE__)
       body = File.read(body_file)
       body.gsub! 'TM-N', issue_id
       ret = {
-        user_name: TaskKnockout.config[:github][:user_name],
-        repo_name: repo_name,
-        title: "[#{issue_id}] #{issue[:fields][:summary]}",
+        username: matched_repo_data[:username],
+        repo_name: matched_repo_data[:repo_name],
+        title: "#{issue_id} - #{issue[:fields][:summary]}",
         body: body,
         head: branch_name,
         base: options[:branch_to]
       }
       Utils.print_data ret, options
-      req = pulls.create ret[:user_name], ret[:repo_name],
+      req = pulls.create ret[:username], ret[:repo_name],
                          title: ret[:title],
                          body: ret[:body],
                          head: ret[:head],
