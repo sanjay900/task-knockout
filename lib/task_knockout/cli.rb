@@ -145,8 +145,9 @@ module TaskKnockout
     option :branch_to, type: :string, default: 'develop', desc: 'the branch to merge into'
     def pull_request(issue_id = nil)
       if issue_id.nil?
-        branch = `git branch 2> /dev/null`
-        issue_id = branch.match(/\* feature\/([A-z0-9]+-[A-z0-9]+)/).captures.first
+        branch = `git rev-parse --abbrev-ref HEAD`
+        matched_issue_data = branch.match(/feature\/(?<issue_id>[A-z0-9]+-[A-z0-9]+)/)
+        issue_id = matched_issue_data && matched_issue_data[:issue_id]
       end
       if issue_id.nil?
         puts 'Unable to infer issue id'
