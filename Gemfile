@@ -4,6 +4,6 @@ source 'https://rubygems.org'
 
 gem 'json'
 gem 'pry'
-gem 'rest-client', github: 'rest-client/rest-client'
+gem 'rest-client', git: 'https://github.com/rest-client/rest-client.git'
 gem 'thor'
 gem 'github_api'
